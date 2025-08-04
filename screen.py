@@ -12,10 +12,25 @@ def show_alert(yer, buyukluk):
     alert_window = tk.Tk()
     alert_window.title("!!! DEPREM !!!")
     alert_window.attributes("-fullscreen", True)
-    alert_window.configure(bg='red')
+    alert_window.configure(bg="#0D0D0D") 
 
-    label = tk.Label(alert_window, text=f"DEPREM OLDU!\nYer: {yer}\nBüyüklük: {buyukluk}", font=("Arial", 50), fg="white", bg="red")
-    label.pack(expand=True)
+    label = tk.Label(
+        alert_window,
+        text="🌍 DEPREM TESPİT EDİLDİ!",
+        font=("Segoe UI", 60, "bold"),
+        fg="#FF4C4C",
+        bg="#0D0D0D"
+    )
+    label.pack(pady=60)
+
+    info_label = tk.Label(
+        alert_window,
+        text=f"Yer: {yer}\nBüyüklük: {buyukluk}",
+        font=("Segoe UI", 40),
+        fg="white",
+        bg="#0D0D0D"
+    )
+    info_label.pack(pady=20)
 
     def hide_alert():
         global alert_window
@@ -23,8 +38,27 @@ def show_alert(yer, buyukluk):
             alert_window.destroy()
             alert_window = None
 
-    btn_hide = tk.Button(alert_window, text="HEMEN SAKLAN", font=("Arial", 30), bg="white", fg="red", command=hide_alert)
+    def on_enter(e):
+        btn_hide.configure(bg="#FF4C4C", fg="white")
+
+    def on_leave(e):
+        btn_hide.configure(bg="white", fg="#FF4C4C")
+
+    btn_hide = tk.Button(
+        alert_window,
+        text="HEMEN SAKLAN 🧠",
+        font=("Segoe UI", 30, "bold"),
+        bg="white",
+        fg="#FF4C4C",
+        activebackground="#FF1C1C",
+        activeforeground="white",
+        padx=40,
+        pady=10,
+        command=hide_alert
+    )
     btn_hide.pack(pady=50)
+    btn_hide.bind("<Enter>", on_enter)
+    btn_hide.bind("<Leave>", on_leave)
 
     def play_siren():
         freq1 = 1000
@@ -35,5 +69,4 @@ def show_alert(yer, buyukluk):
             winsound.Beep(freq2, dur)
 
     threading.Thread(target=play_siren, daemon=True).start()
-
     alert_window.mainloop()
