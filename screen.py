@@ -8,7 +8,7 @@ alert_window = None
 def sesli_okuma(metin):
     engine = pyttsx3.init()
     voices = engine.getProperty('voices')
-    engine.setProperty('voice', voices[1].id)
+    engine.setProperty('voice', voices[1].id) 
     engine.setProperty('rate', 120)
     engine.say(metin)
     engine.runAndWait()
@@ -82,4 +82,4 @@ def show_alert(yer, buyukluk):
 
     alert_window.mainloop()
 
-show_alert("İstanbul", "5.6")
+# show_alert("İstanbul", "5.6")

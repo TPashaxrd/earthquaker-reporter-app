@@ -4,13 +4,13 @@ import webbrowser
 import pystray
 from PIL import Image, ImageDraw
 import tkinter as tk
-
+import widget
 from webhook import send_discord_alert
 from deprem import get_latest_earthquake
 from screen import show_alert
 from settings import SettingsWindow
 from dashboard import start_dashboard
-
+from notif import start_notification
 def log_earthquake(dep):
     try:
         with open("earthquake_log.txt", "a", encoding="utf-8") as f:
@@ -30,6 +30,7 @@ class DepremApp:
         self.root = tk.Tk()
         self.root.withdraw()
 
+        start_notification()
         self.start_tray()
         self.start_widget()
         self.start_dashboard()
@@ -100,7 +101,6 @@ class DepremApp:
     def start_widget(self):
         def widget_thread():
             try:
-                import widget
                 widget.DepremWidget()
             except Exception as e:
                 print(f"[WIDGET ERROR] {e}")
