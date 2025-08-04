@@ -2,6 +2,9 @@ import threading
 import time
 import webbrowser
 import pystray
+import os
+import sys
+import win32com.client
 from PIL import Image, ImageDraw
 import tkinter as tk
 import widget
@@ -11,6 +14,8 @@ from screen import show_alert
 from settings import SettingsWindow
 from dashboard import start_dashboard
 from notif import start_notification
+from auto_start import add_to_startup as add_startup_func
+
 def log_earthquake(dep):
     try:
         with open("earthquake_log.txt", "a", encoding="utf-8") as f:
@@ -106,6 +111,13 @@ class DepremApp:
                 print(f"[WIDGET ERROR] {e}")
 
         threading.Thread(target=widget_thread, daemon=True).start()
+    
+def add_to_startup():
+    script_path = os.path.abspath(sys.argv[0])
+    shortcut_name = "EarthquakeDetector"
+    add_startup_func(script_path, shortcut_name)
+    print(f"{shortcut_name} added to startup.")
 
 if __name__ == "__main__":
+    add_to_startup()
     DepremApp()
