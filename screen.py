@@ -2,13 +2,14 @@ import tkinter as tk
 import threading
 import winsound
 import pyttsx3
+import security
 
 alert_window = None
 
 def sesli_okuma(metin):
     engine = pyttsx3.init()
     voices = engine.getProperty('voices')
-    engine.setProperty('voice', voices[1].id) 
+    engine.setProperty('voice', voices[1].id)
     engine.setProperty('rate', 120)
     engine.say(metin)
     engine.runAndWait()
@@ -19,67 +20,108 @@ def show_alert(yer, buyukluk):
         return
 
     alert_window = tk.Tk()
-    alert_window.title("Earthquake Alert")
-    alert_window.attributes("-fullscreen", True)
-    alert_window.configure(bg="#0D0D0D") 
+    alert_window.title("EARTHQUAKE ALERT")
+    alert_window.configure(bg="#121212")
 
-    label = tk.Label(
-        alert_window,
-        text="🌍 HAVE EARTHQUAKE RIGHT NOW!",
-        font=("Ubuntu Mono", 60, "bold"),
-        fg="#FF0000",
-        bg="#0D0D0D"
-    )
-    label.pack(pady=60)
+    alert_window.resizable(False, False)
 
-    info_label = tk.Label(
+    ekran_genislik = alert_window.winfo_screenwidth()
+    ekran_yukseklik = alert_window.winfo_screenheight()
+    alert_window.geometry(f"{ekran_genislik}x{ekran_yukseklik}+0+0")
+
+    alert_window.attributes("-topmost", True)
+
+    def prevent_move(event=None):
+        alert_window.geometry(f"{ekran_genislik}x{ekran_yukseklik}+0+0")
+    alert_window.bind("<Configure>", prevent_move)
+
+    alert_window.protocol("WM_DELETE_WINDOW", lambda: None)
+    alert_window.bind("<Escape>", lambda e: "break")
+
+    tk.Label(
         alert_window,
-        text=f"Location: {yer} Size: {buyukluk}",
-        font=("Segoe UI", 40),
+        text="🌍 EARTHQUAKE DETECTED!",
+        font=("Segoe UI Black", 70, "bold"),
+        fg="#FF3B3B",
+        bg="#121212"
+    ).pack(pady=(80, 30))
+
+    tk.Label(
+        alert_window,
+        text=f"Location: {yer}  |  Magnitude: {buyukluk}",
+        font=("Segoe UI", 36),
         fg="white",
-        bg="#0D0D0D"
+        bg="#121212"
+    ).pack(pady=(0, 50))
+
+    message_label = tk.Label(
+        alert_window,
+        text="Enter PIN to unlock",
+        font=("Segoe UI Semibold", 24),
+        fg="#E0E0E0",
+        bg="#121212"
     )
-    info_label.pack(pady=20)
+    message_label.pack(pady=(0,15))
 
-    def hide_alert():
-        global alert_window
-        if alert_window is not None:
+    password_entry = tk.Entry(
+        alert_window,
+        show="*",
+        font=("Consolas", 28),
+        width=16,
+        justify="center",
+        bg="#1E1E1E",
+        fg="white",
+        insertbackground="white",
+        relief="flat",
+        bd=0,
+        highlightthickness=2,
+        highlightcolor="#FF3B3B",
+        highlightbackground="#555555",
+        selectbackground="#FF3B3B",
+        selectforeground="white",
+    )
+    password_entry.pack(pady=(0, 40))
+    password_entry.focus_set()
+    password_entry.icursor("end")
+
+    def verify_password():
+        pw = password_entry.get().strip()
+        if security.check_password(pw):
             alert_window.destroy()
-            alert_window = None
+        else:
+            message_label.config(text="❌ WRONG PIN", fg="#FF5555")
+            password_entry.delete(0, tk.END)
 
-    def on_enter(e):
-        btn_hide.configure(bg="#FF4C4C", fg="white")
-
-    def on_leave(e):
-        btn_hide.configure(bg="white", fg="#FF4C4C")
+    password_entry.bind("<Return>", lambda e: verify_password())
 
     btn_hide = tk.Button(
         alert_window,
-        text="EARTHQUAKE THE END 🧠",
-        font=("Segoe UI", 30, "bold"),
-        bg="white",
-        fg="#FF4C4C",
+        text="UNLOCK 🔓",
+        font=("Segoe UI", 32, "bold"),
+        bg="#FF3B3B",
+        fg="white",
         activebackground="#FF1C1C",
-        activeforeground="white",
-        padx=40,
-        pady=10,
-        command=hide_alert
+        activeforeground="#FFF0F0",
+        padx=50,
+        pady=15,
+        bd=0,
+        relief="ridge",
+        cursor="hand2",
+        command=verify_password
     )
-    btn_hide.pack(pady=50)
+    btn_hide.pack()
+
+    def on_enter(e): btn_hide.configure(bg="#FF1C1C")
+    def on_leave(e): btn_hide.configure(bg="#FF3B3B")
     btn_hide.bind("<Enter>", on_enter)
     btn_hide.bind("<Leave>", on_leave)
 
     def play_siren():
-        freq1 = 1000
-        freq2 = 1500
-        dur = 500
         for _ in range(10):
-            winsound.Beep(freq1, dur)
-            winsound.Beep(freq2, dur)
+            winsound.Beep(1000, 500)
+            winsound.Beep(1500, 500)
 
     threading.Thread(target=play_siren, daemon=True).start()
-    threading.Thread(target=sesli_okuma, args=(f"Deprem tespit edildi! Konum: {yer}, Büyüklük: {buyukluk}",), daemon=True).start()
+    threading.Thread(target=sesli_okuma, args=(f"Deprem tespit edildi. Konum: {yer}, büyüklük: {buyukluk}",), daemon=True).start()
 
     alert_window.mainloop()
-
-# show_alert("İstanbul", "5.6")
