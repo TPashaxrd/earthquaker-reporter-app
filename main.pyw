@@ -15,6 +15,7 @@ from settings import SettingsWindow
 from dashboard import start_dashboard
 from notif import start_notification
 from auto_start import add_to_startup as add_startup_func
+from have_connection import have_connection
 
 def log_earthquake(dep):
     try:
@@ -119,5 +120,9 @@ def add_to_startup():
     print(f"{shortcut_name} added to startup.")
 
 if __name__ == "__main__":
+    if not have_connection():
+        sys.exit(1)
+    else:
+        print("[INFO] Internet connection is available.")  
     add_to_startup()
     DepremApp()
