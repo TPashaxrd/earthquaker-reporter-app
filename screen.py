@@ -1,10 +1,14 @@
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+from comtypes import CLSCTX_ALL
+from ctypes import cast, POINTER
 import tkinter as tk
 import threading
-import winsound
 import pyttsx3
 import security
+import pygame
 
 alert_window = None
+mixer_started = False
 
 def sesli_okuma(metin):
     engine = pyttsx3.init()
@@ -14,6 +18,16 @@ def sesli_okuma(metin):
     engine.say(metin)
     engine.runAndWait()
 
+def play_siren():
+    global mixer_started
+    try:
+        pygame.mixer.init()
+        pygame.mixer.music.load("earthquake-alert.mp3")
+        pygame.mixer.music.play(-1)  # sonsuz loop
+        mixer_started = True
+    except Exception as e:
+        print("Ses oynatma hatası:", e)
+
 def show_alert(yer, buyukluk):
     global alert_window
     if alert_window is not None and alert_window.winfo_exists():
@@ -22,21 +36,31 @@ def show_alert(yer, buyukluk):
     alert_window = tk.Tk()
     alert_window.title("EARTHQUAKE ALERT")
     alert_window.configure(bg="#121212")
-
     alert_window.resizable(False, False)
 
     ekran_genislik = alert_window.winfo_screenwidth()
     ekran_yukseklik = alert_window.winfo_screenheight()
     alert_window.geometry(f"{ekran_genislik}x{ekran_yukseklik}+0+0")
-
     alert_window.attributes("-topmost", True)
 
     def prevent_move(event=None):
         alert_window.geometry(f"{ekran_genislik}x{ekran_yukseklik}+0+0")
     alert_window.bind("<Configure>", prevent_move)
-
     alert_window.protocol("WM_DELETE_WINDOW", lambda: None)
     alert_window.bind("<Escape>", lambda e: "break")
+
+    def keep_on_top():
+        try:
+            alert_window.attributes("-topmost", True)
+            alert_window.after(100, keep_on_top)
+        except:
+            pass
+    keep_on_top()
+
+    devices = AudioUtilities.GetSpeakers()
+    interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+    volume = cast(interface, POINTER(IAudioEndpointVolume))
+    volume.SetMasterVolumeLevelScalar(1.0, None)
 
     tk.Label(
         alert_window,
@@ -61,7 +85,7 @@ def show_alert(yer, buyukluk):
         fg="#E0E0E0",
         bg="#121212"
     )
-    message_label.pack(pady=(0,15))
+    message_label.pack(pady=(0, 15))
 
     password_entry = tk.Entry(
         alert_window,
@@ -87,6 +111,8 @@ def show_alert(yer, buyukluk):
     def verify_password():
         pw = password_entry.get().strip()
         if security.check_password(pw):
+            if mixer_started:
+                pygame.mixer.music.stop()
             alert_window.destroy()
         else:
             message_label.config(text="❌ WRONG PIN", fg="#FF5555")
@@ -116,12 +142,11 @@ def show_alert(yer, buyukluk):
     btn_hide.bind("<Enter>", on_enter)
     btn_hide.bind("<Leave>", on_leave)
 
-    def play_siren():
-        for _ in range(10):
-            winsound.Beep(1000, 500)
-            winsound.Beep(1500, 500)
-
     threading.Thread(target=play_siren, daemon=True).start()
-    threading.Thread(target=sesli_okuma, args=(f"Deprem tespit edildi. Konum: {yer}, büyüklük: {buyukluk}",), daemon=True).start()
+    threading.Thread(
+        target=sesli_okuma,
+        args=(f"Earthquakes in happening. Location: {yer}, Size: {buyukluk}",),
+        daemon=True
+    ).start()
 
     alert_window.mainloop()

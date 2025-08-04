@@ -18,6 +18,7 @@ from auto_start import add_to_startup as add_startup_func
 from have_connection import have_connection
 from last_deprem import last_deprem
 from e_map import EMap
+from donate import donates
 
 def log_earthquake(dep):
     try:
@@ -66,6 +67,7 @@ class DepremApp:
             pystray.MenuItem("🚫 Disturb Mode (Mute Alarms)", lambda icon, item: setattr(self, 'alarm_active', False)),
             pystray.MenuItem("🔄 Restart Application", lambda icon, item: self.root.quit()),
             pystray.MenuItem("❌ Exit Application", lambda icon, item: icon.stop()),
+            pystray.MenuItem("💰 Donate", lambda icon, item: donates()),
             
         )
         threading.Thread(target=self.icon.run, daemon=True).start()
