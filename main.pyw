@@ -1,5 +1,6 @@
 import threading
 import time
+import webbrowser
 import pystray
 from PIL import Image, ImageDraw
 import tkinter as tk
@@ -8,6 +9,14 @@ from webhook import send_discord_alert
 from deprem import get_latest_earthquake
 from screen import show_alert
 from settings import SettingsWindow
+from dashboard import start_dashboard
+
+def log_earthquake(dep):
+    try:
+        with open("earthquake_log.txt", "a", encoding="utf-8") as f:
+            f.write(f"{dep['id']} | {dep['yer']} | Magnitude: {dep['buyukluk']}\n")
+    except Exception as e:
+        print(f"[LOG HATA] {e}")
 
 class DepremApp:
     def __init__(self):
@@ -23,6 +32,7 @@ class DepremApp:
 
         self.start_tray()
         self.start_widget()
+        self.start_dashboard()
 
         threading.Thread(target=self.kontrol_et, daemon=True).start()
 
@@ -37,10 +47,14 @@ class DepremApp:
         return image
 
     def start_tray(self):
-        self.icon = pystray.Icon("deprem_dedektoru", self.create_image(), "Deprem Dedektörü")
+        self.icon = pystray.Icon("deprem_dedektoru", self.create_image(), "Earthquake Detector")
         self.icon.menu = pystray.Menu(
-            pystray.MenuItem("Ayarlar", self.open_settings),
-            pystray.MenuItem("Çıkış", lambda icon, item: icon.stop())
+            pystray.MenuItem("⚙️ Settings", self.open_settings),
+            pystray.MenuItem("🔔 Send Test Alert", lambda icon, item: show_alert("Test Alert", 5.0)),
+            pystray.MenuItem("📊 Open Dashboard", lambda icon, item: webbrowser.open("http://127.0.0.1:8080/")),
+            pystray.MenuItem("🔄 Restart Application", lambda icon, item: self.root.quit()),
+            pystray.MenuItem("🚫 Disturb Mode", lambda icon, item: setattr(self, 'alarm_active', False)),
+            pystray.MenuItem("❌ Exit App", lambda icon, item: icon.stop()),
         )
         threading.Thread(target=self.icon.run, daemon=True).start()
 
@@ -52,7 +66,7 @@ class DepremApp:
         def on_settings_change(active, threshold):
             self.alarm_active = active
             self.alarm_threshold = threshold
-            print(f"[AYARLAR] Alarm: {'Açık' if active else 'Kapalı'}, Eşik: {threshold}")
+            print(f"[SETTINGS] Alarm: {'On' if active else 'Off'}, Threshold: {threshold}")
 
         self.settings_window = SettingsWindow(self.root, self.alarm_active, self.alarm_threshold, on_settings_change).window
 
@@ -64,14 +78,24 @@ class DepremApp:
                 buyukluk = deprem["buyukluk"]
                 yer = deprem["yer"]
 
-                print(f"[KONTROL] ID:{deprem_id} - Büyüklük:{buyukluk} - Yer:{yer}")
+                print(f"[CHECK] ID:{deprem_id} - Magnitude:{buyukluk} - Location:{yer}")
 
                 if (self.SON_DEPREM_ID != deprem_id and buyukluk >= self.alarm_threshold and self.alarm_active):
                     self.SON_DEPREM_ID = deprem_id
-                    print("[YENİ DEPREM] Alarm tetikleniyor!")
+                    print("[NEW EARTHQUAKE] Triggering alert!")
+                    log_earthquake(deprem)
                     threading.Thread(target=show_alert, args=(yer, buyukluk), daemon=True).start()
-                    threading.Thread(target=send_discord_alert, args=(f"🚨 DEPREM OLDU! Yer: {yer} - Büyüklük: {buyukluk}",), daemon=True).start()
+                    threading.Thread(target=send_discord_alert, args=(f"🚨 EARTHQUAKE! Location: {yer} - Magnitude: {buyukluk}",), daemon=True).start()
             time.sleep(10)
+
+    def start_dashboard(self):
+        def dashboard_thread():
+            try:
+                start_dashboard()
+            except Exception as e:
+                print(f"[DASHBOARD ERROR] {e}")
+
+        threading.Thread(target=dashboard_thread, daemon=True).start()
 
     def start_widget(self):
         def widget_thread():
@@ -79,10 +103,9 @@ class DepremApp:
                 import widget
                 widget.DepremWidget()
             except Exception as e:
-                print(f"[WIDGET] HATA: {e}")
+                print(f"[WIDGET ERROR] {e}")
 
         threading.Thread(target=widget_thread, daemon=True).start()
-
 
 if __name__ == "__main__":
     DepremApp()

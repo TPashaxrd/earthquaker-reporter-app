@@ -1,8 +1,17 @@
 import tkinter as tk
 import threading
 import winsound
+import pyttsx3
 
 alert_window = None
+
+def sesli_okuma(metin):
+    engine = pyttsx3.init()
+    voices = engine.getProperty('voices')
+    engine.setProperty('voice', voices[1].id)
+    engine.setProperty('rate', 120)
+    engine.say(metin)
+    engine.runAndWait()
 
 def show_alert(yer, buyukluk):
     global alert_window
@@ -10,22 +19,22 @@ def show_alert(yer, buyukluk):
         return
 
     alert_window = tk.Tk()
-    alert_window.title("!!! DEPREM !!!")
+    alert_window.title("Earthquake Alert")
     alert_window.attributes("-fullscreen", True)
     alert_window.configure(bg="#0D0D0D") 
 
     label = tk.Label(
         alert_window,
-        text="🌍 DEPREM TESPİT EDİLDİ!",
-        font=("Segoe UI", 60, "bold"),
-        fg="#FF4C4C",
+        text="🌍 HAVE EARTHQUAKE RIGHT NOW!",
+        font=("Ubuntu Mono", 60, "bold"),
+        fg="#FF0000",
         bg="#0D0D0D"
     )
     label.pack(pady=60)
 
     info_label = tk.Label(
         alert_window,
-        text=f"Yer: {yer}\nBüyüklük: {buyukluk}",
+        text=f"Location: {yer} Size: {buyukluk}",
         font=("Segoe UI", 40),
         fg="white",
         bg="#0D0D0D"
@@ -46,7 +55,7 @@ def show_alert(yer, buyukluk):
 
     btn_hide = tk.Button(
         alert_window,
-        text="HEMEN SAKLAN 🧠",
+        text="EARTHQUAKE THE END 🧠",
         font=("Segoe UI", 30, "bold"),
         bg="white",
         fg="#FF4C4C",
@@ -69,4 +78,8 @@ def show_alert(yer, buyukluk):
             winsound.Beep(freq2, dur)
 
     threading.Thread(target=play_siren, daemon=True).start()
+    threading.Thread(target=sesli_okuma, args=(f"Deprem tespit edildi! Konum: {yer}, Büyüklük: {buyukluk}",), daemon=True).start()
+
     alert_window.mainloop()
+
+show_alert("İstanbul", "5.6")
