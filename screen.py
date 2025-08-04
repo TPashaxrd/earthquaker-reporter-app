@@ -22,8 +22,8 @@ def play_siren():
     global mixer_started
     try:
         pygame.mixer.init()
-        pygame.mixer.music.load("earthquake-alert.mp3")
-        pygame.mixer.music.play(-1)  # sonsuz loop
+        pygame.mixer.music.load("./Sounds/earthquake-alert.mp3")
+        pygame.mixer.music.play(-1)
         mixer_started = True
     except Exception as e:
         print("Ses oynatma hatası:", e)

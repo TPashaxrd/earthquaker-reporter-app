@@ -4,10 +4,8 @@ import webbrowser
 import pystray
 import os
 import sys
-import win32com.client
-from PIL import Image, ImageDraw
 import tkinter as tk
-import widget
+from PIL import Image
 from webhook import send_discord_alert
 from deprem import get_latest_earthquake
 from screen import show_alert
@@ -19,6 +17,7 @@ from have_connection import have_connection
 from last_deprem import last_deprem
 from e_map import EMap
 from donate import donates
+import widget
 
 def log_earthquake(dep):
     try:
@@ -45,31 +44,34 @@ class DepremApp:
         self.start_dashboard()
 
         threading.Thread(target=self.kontrol_et, daemon=True).start()
-
         send_discord_alert("🤖 **Deprem Dedektörü Bot Başladı!**")
-
         self.root.mainloop()
 
     def create_image(self):
-        image = Image.new('RGB', (64, 64), color='red')
-        d = ImageDraw.Draw(image)
-        d.rectangle([16, 16, 48, 48], fill='white')
-        return image
+        return Image.open("icon.ico") 
 
     def start_tray(self):
-        self.icon = pystray.Icon("deprem_dedektoru", self.create_image(), "Earthquake Detector")
-        self.icon.menu = pystray.Menu(
-            pystray.MenuItem("⚙️ Settings", self.open_settings),
-            pystray.MenuItem("📍 Show Map", lambda icon, item: self.root.after(0, lambda: EMap().show_map())),
-            pystray.MenuItem("🌍 Last Earthquakes", lambda icon, item: last_deprem()),
-            pystray.MenuItem("🔔 Send Test Alert", lambda icon, item: show_alert("Test Alert", 5.0)),
-            pystray.MenuItem("📊 Open Dashboard", lambda icon, item: webbrowser.open("http://127.0.0.1:8080/")),
-            pystray.MenuItem("🚫 Disturb Mode (Mute Alarms)", lambda icon, item: setattr(self, 'alarm_active', False)),
-            pystray.MenuItem("🔄 Restart Application", lambda icon, item: self.root.quit()),
-            pystray.MenuItem("❌ Exit Application", lambda icon, item: icon.stop()),
-            pystray.MenuItem("💰 Donate", lambda icon, item: donates()),
-            
+        def set_alarm_mute(icon, item):
+            self.alarm_active = not self.alarm_active
+            item.text = "🔔 Alarms: On" if self.alarm_active else "🔕 Alarms: Muted"
+            print(f"[TRAY] Alarms {'enabled' if self.alarm_active else 'muted'}.")
+
+        self.icon = pystray.Icon("deprem_dedektoru", self.create_image(), "Deprem Dedektörü")
+        menu_items = pystray.Menu(
+            pystray.MenuItem("🛠 Ayarlar", self.open_settings),
+            pystray.Menu.SEPARATOR,
+            pystray.MenuItem("🌍 Son Depremler", lambda icon, item: last_deprem()),
+            pystray.MenuItem("📍 Haritada Göster", lambda icon, item: self.root.after(0, lambda: EMap().show_map())),
+            pystray.MenuItem("📢 Test Uyarısı Gönder", lambda icon, item: show_alert("Test Alert", 5.0)),
+            pystray.Menu.SEPARATOR,
+            pystray.MenuItem("📊 Gösterge Paneli", lambda icon, item: webbrowser.open("http://127.0.0.1:8080/")),
+            pystray.MenuItem("🔕 Alarm Sessiz Modu", set_alarm_mute),
+            pystray.Menu.SEPARATOR,
+            pystray.MenuItem("💰 Bağış Yap", lambda icon, item: donates()),
+            pystray.MenuItem("🔄 Uygulamayı Yeniden Başlat", lambda icon, item: self.root.quit()),
+            pystray.MenuItem("❌ Çıkış", lambda icon, item: icon.stop()),
         )
+        self.icon.menu = menu_items
         threading.Thread(target=self.icon.run, daemon=True).start()
 
     def open_settings(self, icon=None, item=None):
@@ -108,7 +110,6 @@ class DepremApp:
                 start_dashboard()
             except Exception as e:
                 print(f"[DASHBOARD ERROR] {e}")
-
         threading.Thread(target=dashboard_thread, daemon=True).start()
 
     def start_widget(self):
@@ -117,11 +118,8 @@ class DepremApp:
                 widget.DepremWidget()
             except Exception as e:
                 print(f"[WIDGET ERROR] {e}")
-
         threading.Thread(target=widget_thread, daemon=True).start()
-    
-    
-    
+
 def add_to_startup():
     script_path = os.path.abspath(sys.argv[0])
     shortcut_name = "EarthquakeDetector"
@@ -135,4 +133,3 @@ if __name__ == "__main__":
         print("[INFO] Internet connection is available.")  
     add_to_startup()
     DepremApp()
-    

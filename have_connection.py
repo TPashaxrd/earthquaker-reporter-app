@@ -9,7 +9,7 @@ def have_connection():
         return False
 
 if not have_connection():
-    print("İnternet mi? Yok be, kesilmiş sanki! Uygulama kapanıyor şimdi...")
+    print("[INTERNET] No internet connection detected. Please check your connection.")
     sys.exit() 
 
-print("Oooo, internet var lan!")
+print("[INTERNET] Successyfull Connection!")
