@@ -1,1 +1,13 @@
+__pycache__/
+*.pyc
+
+build/
+dist/
+*.spec
+
+venv/
+.env/
+
+*.log
+
 widget.py

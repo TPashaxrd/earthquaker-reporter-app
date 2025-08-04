@@ -30,6 +30,10 @@ pip install requests pystray pillow
 4. `settings.py` → Eşik değeri gibi ayarları saklar.  
 5. `DepremApp.py` → Tüm parçaları birleştirir, uygulamayı başlatır.
 
+## ⚙️ Build alma?
+1. `pip install pyinstaller`
+2. `pyinstaller --onefile main.pyw`
+
 ### Başlatmak için:
 
 ```bash
