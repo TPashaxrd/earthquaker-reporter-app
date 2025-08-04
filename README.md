@@ -37,7 +37,7 @@ pip install requests pystray pillow
 ### Başlatmak için:
 
 ```bash
-python DepremApp.py
+python main.pyw
 ```
 
 ## ⚙️ Yapılacaklar

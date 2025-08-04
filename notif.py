@@ -1,3 +1,6 @@
+import pygame
+import time
+from playsound import playsound
 from winotify import Notification
 
 def start_notification():
@@ -6,3 +9,10 @@ def start_notification():
                          msg="🔔 App is running. Be safe...",
                          duration="short")
     toast.show()
+
+    pygame.mixer.init()
+    pygame.mixer.music.load("earthquake-notif.mp3") 
+    pygame.mixer.music.play()
+
+    while pygame.mixer.music.get_busy():
+        time.sleep(1)

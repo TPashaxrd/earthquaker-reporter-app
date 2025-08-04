@@ -16,6 +16,8 @@ from dashboard import start_dashboard
 from notif import start_notification
 from auto_start import add_to_startup as add_startup_func
 from have_connection import have_connection
+from last_deprem import last_deprem
+from e_map import EMap
 
 def log_earthquake(dep):
     try:
@@ -57,11 +59,14 @@ class DepremApp:
         self.icon = pystray.Icon("deprem_dedektoru", self.create_image(), "Earthquake Detector")
         self.icon.menu = pystray.Menu(
             pystray.MenuItem("⚙️ Settings", self.open_settings),
+            pystray.MenuItem("📍 Show Map", lambda icon, item: self.root.after(0, lambda: EMap().show_map())),
+            pystray.MenuItem("🌍 Last Earthquakes", lambda icon, item: last_deprem()),
             pystray.MenuItem("🔔 Send Test Alert", lambda icon, item: show_alert("Test Alert", 5.0)),
             pystray.MenuItem("📊 Open Dashboard", lambda icon, item: webbrowser.open("http://127.0.0.1:8080/")),
+            pystray.MenuItem("🚫 Disturb Mode (Mute Alarms)", lambda icon, item: setattr(self, 'alarm_active', False)),
             pystray.MenuItem("🔄 Restart Application", lambda icon, item: self.root.quit()),
-            pystray.MenuItem("🚫 Disturb Mode", lambda icon, item: setattr(self, 'alarm_active', False)),
-            pystray.MenuItem("❌ Exit App", lambda icon, item: icon.stop()),
+            pystray.MenuItem("❌ Exit Application", lambda icon, item: icon.stop()),
+            
         )
         threading.Thread(target=self.icon.run, daemon=True).start()
 
@@ -113,6 +118,8 @@ class DepremApp:
 
         threading.Thread(target=widget_thread, daemon=True).start()
     
+    
+    
 def add_to_startup():
     script_path = os.path.abspath(sys.argv[0])
     shortcut_name = "EarthquakeDetector"
@@ -126,3 +133,4 @@ if __name__ == "__main__":
         print("[INFO] Internet connection is available.")  
     add_to_startup()
     DepremApp()
+    
