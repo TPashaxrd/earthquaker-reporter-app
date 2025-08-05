@@ -4,19 +4,24 @@ from ctypes import cast, POINTER
 import tkinter as tk
 import threading
 import pyttsx3
-import security
+import pythoncom
 import pygame
+import security
+from threading import Lock
 
 alert_window = None
 mixer_started = False
+tts_lock = Lock()
 
 def sesli_okuma(metin):
-    engine = pyttsx3.init()
-    voices = engine.getProperty('voices')
-    engine.setProperty('voice', voices[1].id)
-    engine.setProperty('rate', 120)
-    engine.say(metin)
-    engine.runAndWait()
+    pythoncom.CoInitialize()
+    with tts_lock: 
+        engine = pyttsx3.init()
+        voices = engine.getProperty('voices')
+        engine.setProperty('voice', voices[1].id)
+        engine.setProperty('rate', 120)
+        engine.say(metin)
+        engine.runAndWait()
 
 def play_siren():
     global mixer_started
@@ -29,9 +34,13 @@ def play_siren():
         print("Ses oynatma hatası:", e)
 
 def show_alert(yer, buyukluk):
-    global alert_window
-    if alert_window is not None and alert_window.winfo_exists():
-        return
+    global alert_window, mixer_started
+
+    try:
+        if alert_window is not None and alert_window.winfo_exists():
+            return
+    except tk.TclError:
+        alert_window = None
 
     alert_window = tk.Tk()
     alert_window.title("EARTHQUAKE ALERT")
@@ -145,7 +154,7 @@ def show_alert(yer, buyukluk):
     threading.Thread(target=play_siren, daemon=True).start()
     threading.Thread(
         target=sesli_okuma,
-        args=(f"Earthquakes in happening. Location: {yer}, Size: {buyukluk}",),
+        args=(f"Earthquake is happening. Location: {yer}, Size: {buyukluk}",),
         daemon=True
     ).start()
 

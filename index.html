@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cordision</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto Condensed', sans-serif;
+            background: linear-gradient(135deg, #e0e7ff 0%, #a5b4fc 50%, #818cf8 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0;
+            overflow: hidden;
+            animation: gradientShift 15s ease infinite;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .main-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 4rem;
+            line-height: 1.1;
+            color: #1e293b;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        .sub-text {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 1.5rem;
+            color: #475569;
+            animation: fadeIn 2s ease-in-out;
+        }
+        .learn-more-btn {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-weight: 700;
+            background: linear-gradient(90deg, #ffffff 0%, #f1f5f9 100%);
+            border: 2px solid #9ca3af;
+            color: #1e293b;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: pulse 2s infinite;
+        }
+        .learn-more-btn:hover {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+            border-color: #1e40af;
+            color: #ffffff;
+            transform: translateX(8px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        .signup-btn {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-weight: 700;
+            background: linear-gradient(90deg, #ffffff 0%, #f1f5f9 100%);
+            border: 2px solid #9ca3af;
+            color: #1e293b;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: pulse 2s infinite;
+        }
+        .signup-btn:hover {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+            border-color: #1e40af;
+            color: #ffffff;
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .subscribe-text {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 1.125rem;
+            color: #475569;
+            font-weight: 600;
+        }
+        .logo-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            color: #1e293b;
+            text-transform: uppercase;
+            animation: fadeIn 1s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <header class="w-full text-center py-10">
+        <h1 class="logo-text text-3xl">C O R D I S I O N</h1>
+    </header>
+
+    <main class="flex flex-col items-center justify-center text-center flex-grow px-4">
+        <h2 class="main-text mb-6">"Great things coming soon."</h2>
+        <p class="sub-text mb-8">We are a small and growing consulting firm with big ideas</p>
+        <button class="learn-more-btn">
+            <span>Learn More</span>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </button>
+    </main>
+
+    <footer class="w-full flex justify-between items-center px-10 py-8">
+        <div class="subscribe-text">Subscribe</div>
+        <button class="signup-btn">SIGN UP</button>
+    </footer>
+
+    <script>
+        document.querySelector('.learn-more-btn').addEventListener('click', () => {
+            alert('Not yet. Please check here later again..');
+        });
+        document.querySelector('.signup-btn').addEventListener('click', () => {
+            alert('Not yet. Please check here later again..');
+        });
+    </script>
+</body>
+</html>
